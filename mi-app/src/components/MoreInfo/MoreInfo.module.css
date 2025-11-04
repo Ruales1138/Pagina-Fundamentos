@@ -544,6 +544,70 @@
 	font-weight: 600;
 }
 
+/* Estilos para el input de archivo personalizado */
+.fileInputWrapper {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-bottom: 12px;
+}
+
+.fileInputHidden {
+	display: none;
+}
+
+.customFileButton {
+	background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+	color: white;
+	border: none;
+	padding: 10px 16px;
+	border-radius: 6px;
+	font-weight: 600;
+	cursor: pointer;
+	transition: all 0.3s ease;
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	font-size: 14px;
+	font-family: 'Open Sans', sans-serif;
+	box-shadow: 0 2px 8px rgba(238, 90, 111, 0.3);
+}
+
+.customFileButton:hover {
+	transform: translateY(-2px);
+	box-shadow: 0 4px 12px rgba(238, 90, 111, 0.5);
+	background: linear-gradient(135deg, #ff5252 0%, #e63946 100%);
+}
+
+.customFileButton:active {
+	transform: translateY(0);
+	box-shadow: 0 2px 4px rgba(238, 90, 111, 0.4);
+}
+
+.clearFileBtn {
+	background: linear-gradient(135deg, #C2262B 0%, #a51f24 100%);
+	color: white;
+	border: none;
+	width: 32px;
+	height: 32px;
+	border-radius: 50%;
+	cursor: pointer;
+	font-size: 16px;
+	font-weight: bold;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transition: all 0.3s ease;
+	padding: 0;
+	box-shadow: 0 2px 6px rgba(194, 38, 43, 0.4);
+}
+
+.clearFileBtn:hover {
+	transform: scale(1.15) rotate(90deg);
+	box-shadow: 0 4px 12px rgba(194, 38, 43, 0.6);
+	background: linear-gradient(135deg, #d62828 0%, #9d0208 100%);
+}
+
 .successMsg {
 	color: #0f7b0f;
 	background: #e9f7ef;

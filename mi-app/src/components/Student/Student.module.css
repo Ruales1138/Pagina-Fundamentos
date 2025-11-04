@@ -251,16 +251,16 @@ body {
     cards visible without cutting the right one. */
   /* responsive gap: shrink on small screens, grow on large ones
     (made more conservative to avoid cutting the rightmost card) */
-  --card-gap: clamp(8px, 2.5vw, 48px);
-  --card-width: min(300px, calc((100% - (var(--card-gap) * 2)) / 3));
+  --card-gap: clamp(16px, 3vw, 32px);
+  --card-width: min(320px, calc((100% - (var(--card-gap) * 2)) / 3));
 
   display: flex;
   justify-content: flex-start;  /* left-align the track so first/last cards are fully visible */
   align-items: flex-start;
-  flex-wrap: nowrap;            /* no wrap: mantenemos 3 cards en la misma fila */
+  flex-wrap: wrap;              /* permitir wrap para que las tarjetas se acomoden */
   gap: var(--card-gap);         /* más espacio entre tarjetas en desktop */
   margin-top: 24px;
-  overflow: hidden;             /* ocultar desbordes (navegación por botones) */
+  overflow: visible;            /* mostrar todo el contenido sin cortar */
 
   /* Let the container use the available width. JS will compute how many
     full cards can fit and adjust translation so no card is cut. */
@@ -268,21 +268,16 @@ body {
   max-width: 100%;
   box-sizing: border-box;
 
-  /* give a slightly larger left inset so the first card is not visually
-    covered by the left-side fade overlay. Increased from 40px to 64px
-    to avoid the remaining overlap the user reported. This is removed
-    on small screens where fades are hidden. */
-  padding-left: 64px;
-  /* Add symmetric right padding so the last card is not covered by the
-     right-side fade overlay. Keep the same value as the left inset. */
-  padding-right: 64px;
+  /* Padding horizontal para dar espacio */
+  padding-left: 20px;
+  padding-right: 20px;
 }
 
 .cardsTrack {
   display: flex;
   align-items: flex-start;
-  transition: transform 420ms cubic-bezier(.22,.9,.27,1);
-  will-change: transform;
+  flex-wrap: wrap;
+  width: 100%;
 
   /* gap between card items (matches desktop spacing) */
   gap: var(--card-gap);

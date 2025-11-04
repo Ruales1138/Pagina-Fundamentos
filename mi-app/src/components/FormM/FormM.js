@@ -1,9 +1,105 @@
-import React from "react";
+import React, { useState } from "react";
 import style from "./FormM.module.css";
 import logo_udem from "../../images/logo_udem.png";
 import avatar from "../../images/avatar.png";
+import { useNavigate } from "react-router-dom";
 
 function FormM() {
+    const navigate = useNavigate();
+    
+    // Estados para todos los campos del formulario
+    const [formData, setFormData] = useState({
+        fullName: '',
+        studentID: '',
+        program: '',
+        currentSemester: '',
+        averageGrade: '',
+        email: '',
+        telephone: '',
+        hasExperience: '',
+        experienceDetails: '',
+        courses: '',
+        availability: []
+    });
+
+    const [submitting, setSubmitting] = useState(false);
+    const [message, setMessage] = useState('');
+
+    const handleInputChange = (e) => {
+        const { id, value } = e.target;
+        setFormData(prev => ({
+            ...prev,
+            [id]: value
+        }));
+    };
+
+    const handleRadioChange = (e) => {
+        setFormData(prev => ({
+            ...prev,
+            hasExperience: e.target.value
+        }));
+    };
+
+    const handleCheckboxChange = (e) => {
+        const value = e.target.value;
+        setFormData(prev => ({
+            ...prev,
+            availability: prev.availability.includes(value)
+                ? prev.availability.filter(item => item !== value)
+                : [...prev.availability, value]
+        }));
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setSubmitting(true);
+        setMessage('');
+
+        const token = localStorage.getItem('token');
+        if (!token) {
+            alert('Debes iniciar sesión para aplicar a una convocatoria.');
+            navigate('/');
+            return;
+        }
+
+        try {
+            // Aquí deberías tener el ID de la convocatoria
+            // Por ahora usaremos un placeholder
+            const convocatoriaId = 1; // TODO: Obtener del contexto/props
+
+            const payload = {
+                convocatoriaId,
+                perfilTexto: JSON.stringify(formData), // Convertir todo el perfil a texto
+            };
+
+            const res = await fetch('http://localhost:3001/api/applications', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`
+                },
+                body: JSON.stringify(payload)
+            });
+
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message || 'Error al enviar la aplicación');
+
+            setMessage('¡Aplicación enviada exitosamente!');
+            setTimeout(() => navigate('/student'), 2000);
+        } catch (err) {
+            console.error(err);
+            setMessage(err.message || 'Error al enviar la aplicación');
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
+    const handleCancel = () => {
+        if (window.confirm('¿Estás seguro de que deseas cancelar? Se perderán los datos ingresados.')) {
+            navigate('/student');
+        }
+    };
+
     return(
         <div className={style.pageContainer}>
             <header className={style.container}>
@@ -15,14 +111,21 @@ function FormM() {
             <section className={style.personalDataContainer}>
                 <h2 className={style.textPersonalData}>Datos Personales</h2>
 
-                <form>
+                <form onSubmit={handleSubmit}>
                     <div className={style.textbox}>
                         <label className={style.textbox.label} htmlFor="fullName">
                             Nombre Completo<span className={style.required}>*</span>
                         </label>
                         <br></br>
                         
-                        <input className={style.textbox.input} id="fullName" type="text" />
+                        <input 
+                            className={style.textbox.input} 
+                            id="fullName" 
+                            type="text" 
+                            value={formData.fullName}
+                            onChange={handleInputChange}
+                            required
+                        />
                     </div>
 
                     <div className={style.textboxright}>
@@ -30,13 +133,26 @@ function FormM() {
                             Código Estudiantil<span className={style.required}>*</span>
                         </label>
                         <br></br>
-                        <input className={style.textbox.input} id="studentID" type="text"  />
+                        <input 
+                            className={style.textbox.input} 
+                            id="studentID" 
+                            type="text"
+                            value={formData.studentID}
+                            onChange={handleInputChange}
+                            required
+                        />
                     </div>
 
                     <div className={style.textProgram}>
                         <label>Programa Académico<span className={style.required}>*</span></label>
 
-                        <select className={style.dropdown}>
+                        <select 
+                            className={style.dropdown}
+                            id="program"
+                            value={formData.program}
+                            onChange={handleInputChange}
+                            required
+                        >
                             <option value="">Selecionar</option>
                             <option value="Ingeniería de Sistemas">Ingeniería de Sistemas</option>
                             <option value="Ingeniería Industrial">Ingeniería Industrial</option>
@@ -49,7 +165,16 @@ function FormM() {
                             Semestre Actual<span className={style.required}>*</span>
                         </label>
                         <br></br>
-                        <input className={style.textboxRightTwo.input} id="currentSemester" type="text"  />
+                        <input 
+                            className={style.textboxRightTwo.input} 
+                            id="currentSemester" 
+                            type="number"
+                            min="1"
+                            max="12"
+                            value={formData.currentSemester}
+                            onChange={handleInputChange}
+                            required
+                        />
                     </div>
 
                     <div className={style.textboxAverage}>
@@ -57,7 +182,17 @@ function FormM() {
                             Promedio Acumulado (GPA)<span className={style.required}>*</span>
                         </label>
                         <br></br>
-                        <input className={style.textboxAverage.input} id="averageGrade" type="text"  />
+                        <input 
+                            className={style.textboxAverage.input} 
+                            id="averageGrade" 
+                            type="number"
+                            step="0.1"
+                            min="0"
+                            max="5"
+                            value={formData.averageGrade}
+                            onChange={handleInputChange}
+                            required
+                        />
                     </div>
 
                     <div className={style.textboxEmail}>
@@ -65,7 +200,14 @@ function FormM() {
                             Correo Institucional<span className={style.required}>*</span>
                         </label>
                         <br></br>
-                        <input className={style.textboxEmail.input} id="email" type="text"  />
+                        <input 
+                            className={style.textboxEmail.input} 
+                            id="email" 
+                            type="email"
+                            value={formData.email}
+                            onChange={handleInputChange}
+                            required
+                        />
                     </div>
 
                     <div className={style.textboxTelephone}>
@@ -73,23 +215,14 @@ function FormM() {
                             Teléfono de Contacto<span className={style.required}>*</span>
                         </label>
                         <br></br>
-                        <input className={style.textboxTelephone.input} id="telephone" type="text"  />
-                    </div>
-
-                    <div className={style.textboxEmail}>
-                        <label className={style.textboxEmail.label} htmlFor="email">
-                            Correo Institucional<span className={style.required}>*</span>
-                        </label>
-                        <br></br>
-                        <input className={style.textboxEmail.input} id="email" type="text"  />
-                    </div>
-
-                    <div className={style.textboxTelephone}>
-                        <label className={style.textboxTelephone.label} htmlFor="telephone">
-                            Teléfono de Contacto<span className={style.required}>*</span>
-                        </label>
-                        <br></br>
-                        <input className={style.textboxTelephone.input} id="telephone" type="text"  />
+                        <input 
+                            className={style.textboxTelephone.input} 
+                            id="telephone" 
+                            type="tel"
+                            value={formData.telephone}
+                            onChange={handleInputChange}
+                            required
+                        />
                     </div>
 
                 </form>
@@ -111,7 +244,9 @@ function FormM() {
                                     name="monitorExperience" 
                                     value="sí" 
                                     id="experienceYes"
-                                    className={style.radioInput} 
+                                    className={style.radioInput}
+                                    checked={formData.hasExperience === 'sí'}
+                                    onChange={handleRadioChange}
                                 />
                                 <label htmlFor="experienceYes">Sí</label>
                             </div>
@@ -124,7 +259,9 @@ function FormM() {
                                     name="monitorExperience" 
                                     value="no" 
                                     id="experienceNo" 
-                                    className={style.radioInput} 
+                                    className={style.radioInput}
+                                    checked={formData.hasExperience === 'no'}
+                                    onChange={handleRadioChange}
                                 />
                                 <label htmlFor="experienceNo">No</label>
                             </div>
@@ -136,7 +273,13 @@ function FormM() {
                             Si es así, por favor detalla tu experiencia y las asignaturas que has monitoreado:
                         </label>
                         <br></br>
-                        <input className={style.textarea.input} id="experienceDetails" type="text"  />
+                        <textarea 
+                            className={style.textarea.input} 
+                            id="experienceDetails"
+                            value={formData.experienceDetails}
+                            onChange={handleInputChange}
+                            rows="4"
+                        />
                     </div>
                 </form>
             </section>
@@ -146,10 +289,18 @@ function FormM() {
                 <form>
                     <p className={style.textCourses}>Cursos a postularse<span className={style.required}>*</span></p>
 
-                    <select className={style.containerCourses}>
+                    <select 
+                        className={style.containerCourses}
+                        id="courses"
+                        value={formData.courses}
+                        onChange={handleInputChange}
+                        required
+                    >
                         <option value="">Seleccionar Cursos</option>
                         <option value="Matemáticas I">Matemáticas I</option>
                         <option value="Programación Básica">Programación Básica</option>
+                        <option value="Física">Física</option>
+                        <option value="Cálculo">Cálculo</option>
                     </select>
 
                     <p className={style.textDisponibility}>Disponibilidad Horaria</p>
@@ -208,8 +359,33 @@ function FormM() {
 
             </section>
 
-            <button className={style.buttonCancel} type="button">Cancelar</button>
-            <button className={style.buttonSend} type="submit">Enviar</button>
+            <button 
+                className={style.buttonCancel} 
+                type="button"
+                onClick={handleCancel}
+            >
+                Cancelar
+            </button>
+            <button 
+                className={style.buttonSend} 
+                type="submit"
+                disabled={submitting}
+            >
+                {submitting ? 'Enviando...' : 'Enviar'}
+            </button>
+
+            {message && (
+                <div style={{
+                    marginTop: '20px',
+                    padding: '15px',
+                    backgroundColor: message.includes('Error') ? '#f8d7da' : '#d4edda',
+                    color: message.includes('Error') ? '#721c24' : '#155724',
+                    borderRadius: '5px',
+                    textAlign: 'center'
+                }}>
+                    {message}
+                </div>
+            )}
 
         </div>
     )

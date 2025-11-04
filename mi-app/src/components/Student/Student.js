@@ -7,8 +7,10 @@ import Carousel from "../Caousel/Carousel";
 import Aplications from "../Aplications/Aplications";
 import Alerts from "../Alerts/Alerts";
 import Welcome from "../Welcome/Welcome";
+import { useNavigate } from "react-router-dom";
 
 function Student() {
+  const navigate = useNavigate();
   // marcador temporal para el nombre del usuario conectado; reemplazar por la autenticación real
   const [userName, setUserName] = useState('Susana Morales');
   // poblar userName desde localStorage si está disponible (el login guarda `user`)
@@ -74,6 +76,12 @@ function Student() {
     // manejador placeholder - la app puede reemplazarlo por navegación real
     // eslint-disable-next-line no-console
     console.log('Ver perfil click');
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    navigate('/');
   };
 
   const scrollToSection = (sectionId) => {
@@ -171,10 +179,10 @@ function Student() {
         <img src={logo_app} alt="Logo de la aplicación" className={style.logo} />
 
         <div className={style.rightSection}>
-          <button className={style.button}>
+          <button className={style.button} onClick={handleProfileClick}>
             <span className={style.iconUser}>👤</span> Usuario
           </button>
-          <button className={style.button}>
+          <button className={style.button} onClick={handleLogout}>
             <span className={style.iconLogout}>⎋</span> Cerrar Sesión
           </button>
           <img src={perfil} alt="Foto de perfil" className={style.perfil} />
@@ -219,19 +227,19 @@ function Student() {
       {/* Footer */}
       <footer className={style.footer}>
         <div className={style.footerLinks}>
-          <a href="#recursos">Recursos</a>
-          <a href="#contacto">Contacto</a>
-          <a href="#legal">Legal</a>
+          <a href="#" onClick={(e) => { e.preventDefault(); alert('Recursos educativos próximamente disponibles.'); }}>Recursos</a>
+          <a href="#" onClick={(e) => { e.preventDefault(); alert('Contacto: monitoria@udem.edu.co | Tel: (604) 340 5555'); }}>Contacto</a>
+          <a href="#" onClick={(e) => { e.preventDefault(); alert('Términos y condiciones del programa de monitorías.'); }}>Legal</a>
         </div>
 
         <div className={style.footerIcons}>
-          <a href="https://facebook.com" target="_blank" rel="noopener noreferrer">
+          <a href="https://www.facebook.com/udemoficial" target="_blank" rel="noopener noreferrer">
             <i className="fab fa-facebook-f"></i>
           </a>
-          <a href="https://twitter.com" target="_blank" rel="noopener noreferrer">
+          <a href="https://twitter.com/udemoficial" target="_blank" rel="noopener noreferrer">
             <i className="fab fa-twitter"></i>
           </a>
-          <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer">
+          <a href="https://www.linkedin.com/school/universidad-de-medellin/" target="_blank" rel="noopener noreferrer">
             <i className="fab fa-linkedin-in"></i>
           </a>
         </div>

@@ -2,7 +2,13 @@
 const express = require("express");
 const router = express.Router();
 const auth = require("../middleware/auth");
-const { applyToConvocatoria, listApplications, updateApplicationStatus } = require("../controllers/applicationController");
+const requireDocente = require("../middleware/requireDocente");
+const { 
+  applyToConvocatoria, 
+  listApplications, 
+  updateApplicationStatus,
+  recalculateScoreWithAI 
+} = require("../controllers/applicationController");
 const multer = require("multer");
 const path = require("path");
 
@@ -16,7 +22,7 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
-// apply with optional CV upload
+// apply with optional CV upload (🤖 IA automática)
 router.post("/", auth, upload.single("cv"), applyToConvocatoria);
 
 // list apps (docente sees all for their convocatorias; student sees own)
@@ -24,5 +30,8 @@ router.get("/", auth, listApplications);
 
 // update status (docente owner only)
 router.patch("/:id/status", auth, updateApplicationStatus);
+
+// 🤖 Recalcular score con IA (solo docentes)
+router.post("/:id/recalculate-score", auth, requireDocente, recalculateScoreWithAI);
 
 module.exports = router;

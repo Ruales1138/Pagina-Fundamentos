@@ -94,8 +94,8 @@ function Login() {
         </form>
 
         <div className={style.footer}>
-          <a href="#">¿Olvidó su contraseña?</a>
-          <a onClick={() => navigate("/register")}>Crear cuenta</a>
+          <a href="#" onClick={(e) => { e.preventDefault(); alert('Funcionalidad de recuperación de contraseña próximamente. Contacta al administrador.'); }}>¿Olvidó su contraseña?</a>
+          <a href="#" onClick={(e) => { e.preventDefault(); navigate("/register"); }}>Crear cuenta</a>
         </div>
       </div>
     </div>

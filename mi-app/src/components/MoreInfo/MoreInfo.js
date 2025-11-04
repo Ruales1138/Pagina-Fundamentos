@@ -235,11 +235,33 @@ export default function MoreInfo() {
               rows={5}
             />
             <label className={style.applyLabel}>Hoja de vida (PDF, opcional)</label>
-            <input
-              type="file"
-              accept=".pdf,.doc,.docx"
-              onChange={(e) => setCvFile(e.target.files && e.target.files[0])}
-            />
+            <div className={style.fileInputWrapper}>
+              <input
+                type="file"
+                id="cvFileInput"
+                accept=".pdf,.doc,.docx"
+                onChange={(e) => setCvFile(e.target.files && e.target.files[0])}
+                className={style.fileInputHidden}
+              />
+              <label htmlFor="cvFileInput" className={style.customFileButton}>
+                📎 {cvFile ? cvFile.name : 'Seleccionar archivo'}
+              </label>
+              {cvFile && (
+                <button 
+                  type="button" 
+                  onClick={() => {
+                    setCvFile(null);
+                    // Resetear el input file
+                    const fileInput = document.getElementById('cvFileInput');
+                    if (fileInput) fileInput.value = '';
+                  }} 
+                  className={style.clearFileBtn}
+                  title="Eliminar archivo"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
             <div className={style.applyActions}>
               <Link to="/student" className={style.backBtnInline}>Cancelar</Link>
               <button type="submit" className={style.submitBtn} disabled={submitting}>

@@ -2,18 +2,7 @@
 const Application = require("../models/Application");
 const Convocatoria = require("../models/Convocatoria");
 const { Op } = require("sequelize");
-
-// naive AI-like scoring: count keyword matches between perfilTexto and convocatoria requisitos/habilidades
-function scoreProfile(perfil, requisitos = [], habilidades = []) {
-  if (!perfil) return 0;
-  const text = perfil.toLowerCase();
-  const tokens = [...requisitos, ...habilidades]
-    .filter(Boolean)
-    .map((t) => String(t).toLowerCase());
-  if (tokens.length === 0) return 0;
-  const matches = tokens.reduce((acc, t) => acc + (text.includes(t) ? 1 : 0), 0);
-  return Math.round((matches / tokens.length) * 100);
-}
+const { analyzeCVWithAI } = require("../services/aiService");
 
 async function applyToConvocatoria(req, res) {
   try {
@@ -29,7 +18,16 @@ async function applyToConvocatoria(req, res) {
     if (existing) return res.status(409).json({ ok: false, message: "Ya aplicaste a esta convocatoria" });
 
     const cvPath = req.file ? `/uploads/${req.file.filename}` : null;
-    const score = scoreProfile(perfilTexto, convocatoria.requisitos, convocatoria.habilidadesRequeridas);
+    
+    // 🤖 ANÁLISIS CON IA: Analizar CV y perfil con GPT-4
+    console.log("🤖 Analizando CV con IA...");
+    const score = await analyzeCVWithAI(
+      perfilTexto,
+      cvPath,
+      convocatoria.requisitos,
+      convocatoria.habilidadesRequeridas
+    );
+    console.log(`✅ Score calculado: ${score}%`);
 
     const application = await Application.create({
       estudianteId: req.user.id,
@@ -40,7 +38,7 @@ async function applyToConvocatoria(req, res) {
       estado: "postulada",
     });
 
-    return res.status(201).json({ ok: true, application });
+    return res.status(201).json({ ok: true, application, score });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ ok: false, message: "Error del servidor" });
@@ -96,4 +94,59 @@ async function updateApplicationStatus(req, res) {
   }
 }
 
-module.exports = { applyToConvocatoria, listApplications, updateApplicationStatus };
+/**
+ * 🤖 Recalcular score de una aplicación usando IA
+ * Solo para docentes que sean dueños de la convocatoria
+ */
+async function recalculateScoreWithAI(req, res) {
+  try {
+    const { id } = req.params;
+
+    const app = await Application.findByPk(id, { 
+      include: [{ association: "convocatoria" }] 
+    });
+    
+    if (!app) {
+      return res.status(404).json({ ok: false, message: "Postulación no encontrada" });
+    }
+
+    // Verificar que el docente sea dueño de la convocatoria
+    if (app.convocatoria.docenteId !== req.user.id) {
+      return res.status(403).json({ ok: false, message: "No autorizado" });
+    }
+
+    console.log(`🤖 Recalculando score con IA para aplicación ${id}...`);
+    
+    // Calcular nuevo score con IA
+    const newScore = await analyzeCVWithAI(
+      app.perfilTexto,
+      app.cvPath,
+      app.convocatoria.requisitos,
+      app.convocatoria.habilidadesRequeridas
+    );
+
+    const oldScore = app.score;
+    app.score = newScore;
+    await app.save();
+
+    console.log(`✅ Score actualizado: ${oldScore}% → ${newScore}%`);
+
+    return res.json({ 
+      ok: true, 
+      message: "Score recalculado con IA",
+      oldScore,
+      newScore,
+      application: app 
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ ok: false, message: "Error del servidor" });
+  }
+}
+
+module.exports = { 
+  applyToConvocatoria, 
+  listApplications, 
+  updateApplicationStatus,
+  recalculateScoreWithAI 
+};
