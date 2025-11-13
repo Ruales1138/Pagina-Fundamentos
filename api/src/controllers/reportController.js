@@ -6,15 +6,29 @@ async function createReport(req, res) {
   try {
     const { assignmentId, fecha, horasReportadas, comentarios, desempeño } = req.body;
 
-    const assignment = await Assignment.findByPk(assignmentId);
+    const assignment = await Assignment.findByPk(assignmentId, {
+      include: [{ association: 'estudiante' }, { association: 'convocatoria' }]
+    });
     if (!assignment) return res.status(404).json({ ok: false, message: "Asignación no encontrada" });
 
-    // only docente owner can report (or allow coordinators later)
-    if (req.user.role !== "Docente" || assignment.docenteId !== req.user.id) {
-      return res.status(403).json({ ok: false, message: "No autorizado" });
+    // Permitir al docente dueño O al estudiante asignado crear reportes
+    const isDocente = req.user.role === "Docente" && assignment.convocatoria.docenteId === req.user.id;
+    const isEstudianteAsignado = req.user.role === "Estudiante" && assignment.estudianteId === req.user.id;
+
+    if (!isDocente && !isEstudianteAsignado) {
+      return res.status(403).json({ ok: false, message: "No autorizado para crear reportes en esta asignación" });
     }
 
-    const report = await MonitoringReport.create({ assignmentId, fecha, horasReportadas, comentarios, desempeño, autorId: req.user.id });
+    const report = await MonitoringReport.create({ 
+      assignmentId, 
+      fecha, 
+      horasReportadas, 
+      comentarios, 
+      desempeño, 
+      autorId: req.user.id 
+    });
+    
+    console.log(`📝 Reporte creado por ${req.user.role}: ${req.user.username}`);
     return res.status(201).json({ ok: true, report });
   } catch (err) {
     console.error(err);

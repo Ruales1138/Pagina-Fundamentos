@@ -888,3 +888,471 @@ body {
   font-size: 14px;
 }
 
+/* ==================== MODAL DE DETALLES ==================== */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modalContent {
+  background: white;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 700px;
+  max-height: 85vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.modalHeader {
+  padding: 20px 24px;
+  background: linear-gradient(135deg, #c1272d 0%, #a01f24 100%);
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px solid #8a1a1f;
+}
+
+.modalHeader h3 {
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 600;
+}
+
+.closeBtn {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.8rem;
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
+
+.closeBtn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: rotate(90deg);
+}
+
+.modalBody {
+  padding: 24px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.detailSection {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin-bottom: 16px;
+  border-left: 4px solid #c1272d;
+}
+
+.detailSection h4 {
+  margin: 0 0 12px 0;
+  font-size: 1.1rem;
+  color: #c1272d;
+  font-weight: 600;
+}
+
+.detailSection p {
+  margin: 8px 0;
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.detailSection strong {
+  color: #333;
+  margin-right: 8px;
+}
+
+.perfilTexto {
+  background: white;
+  padding: 16px;
+  border-radius: 6px;
+  border: 1px solid #dee2e6;
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: #555;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.scoreHighlight {
+  display: inline-block;
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.downloadBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #c1272d 0%, #a01f24 100%);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(193, 39, 45, 0.3);
+}
+
+.downloadBtn:hover {
+  background: linear-gradient(135deg, #a01f24 0%, #8a1a1f 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(193, 39, 45, 0.4);
+}
+
+.noData {
+  color: #999;
+  font-style: italic;
+}
+
+.aiAnalysisBox {
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  border: 2px solid #0ea5e9;
+  border-radius: 8px;
+  padding: 16px;
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: #0c4a6e;
+  white-space: pre-wrap;
+}
+
+.modalFooter {
+  padding: 16px 24px;
+  background: #f8f9fa;
+  border-top: 1px solid #dee2e6;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.btnSecondary {
+  background: #6c757d;
+  color: white;
+  border: none;
+  padding: 10px 24px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btnSecondary:hover {
+  background: #5a6268;
+  transform: translateY(-1px);
+}
+
+/* Badge de estado en el modal */
+.badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.badge.postulada {
+  background: #e3f2fd;
+  color: #1565c0;
+}
+
+.badge.preseleccionada {
+  background: #fff3e0;
+  color: #e65100;
+}
+
+.badge.seleccionada {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.badge.rechazada {
+  background: #ffebee;
+  color: #c62828;
+}
+
+/* --- Estilos para Informes de Monitores --- */
+.informesContainer {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.informesHeader {
+  margin-bottom: 24px;
+}
+
+.informesHeader h2 {
+  color: #c1272d;
+  font-size: 1.8rem;
+  margin-bottom: 16px;
+  font-weight: 600;
+  margin-left: 0;
+}
+
+.filterRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 10px;
+  border: 2px solid #dee2e6;
+}
+
+.filterRow label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 600;
+  color: #333;
+  font-size: 1rem;
+}
+
+.filterRow select,
+.filterSelect {
+  padding: 10px 16px;
+  border: 2px solid #c1272d;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-family: inherit;
+  background: white;
+  color: #333;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 300px;
+}
+
+.filterRow select:hover,
+.filterSelect:hover {
+  border-color: #a01f24;
+  box-shadow: 0 2px 8px rgba(193, 39, 45, 0.2);
+}
+
+.filterRow select:focus,
+.filterSelect:focus {
+  outline: none;
+  border-color: #c1272d;
+  box-shadow: 0 0 0 3px rgba(193, 39, 45, 0.15);
+}
+
+/* --- MODAL DE PERFIL --- */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  backdrop-filter: blur(4px);
+}
+
+.modalContent {
+  background: white;
+  border-radius: 16px;
+  width: 90%;
+  max-width: 600px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.modalHeader {
+  background: linear-gradient(135deg, #c1272d 0%, #a01f24 100%);
+  color: white;
+  padding: 20px 24px;
+  border-radius: 16px 16px 0 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modalHeader h3 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.closeBtn {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  font-size: 1.5rem;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.closeBtn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: rotate(90deg);
+}
+
+.modalBody {
+  padding: 24px;
+}
+
+.profileSection {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+}
+
+.profileImageContainer {
+  flex-shrink: 0;
+}
+
+.profileImage {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  border: 4px solid #c1272d;
+  box-shadow: 0 4px 12px rgba(193, 39, 45, 0.2);
+  object-fit: cover;
+}
+
+.profileInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.infoRow {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 8px;
+  border-left: 4px solid #c1272d;
+}
+
+.infoLabel {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.infoValue {
+  font-size: 1.05rem;
+  color: #333;
+  font-weight: 500;
+}
+
+.modalFooter {
+  padding: 16px 24px;
+  background: #f8f9fa;
+  border-radius: 0 0 16px 16px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.btnClose {
+  background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+  color: white;
+  border: none;
+  padding: 10px 24px;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btnClose:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
+}
+
+/* Responsive para el modal */
+@media (max-width: 768px) {
+  .modalContent {
+    width: 95%;
+    max-width: none;
+  }
+
+  .profileSection {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .profileImage {
+    width: 100px;
+    height: 100px;
+  }
+
+  .infoRow {
+    align-items: center;
+  }
+}

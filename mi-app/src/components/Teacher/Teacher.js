@@ -5,6 +5,7 @@ import logo_app from "../../images/logo_app.png";
 import perfil from "../../images/perfil.png";
 import logo_udem from "../../images/logo_udem.png";
 import { useNavigate } from "react-router-dom";
+import Alerts from "../Alerts/Alerts";
 
 /* ---------------- PublicarConvocatoria ---------------- */
 function PublicarConvocatoria() {
@@ -145,189 +146,137 @@ function PublicarConvocatoria() {
   );
 }
 
-/* ---------------- RegistrarInforme ---------------- */
-function RegistrarInforme() {
-  const [assignmentId, setAssignmentId] = useState('');
+/* ---------------- VerInformesMonitores (Vista del Docente) ---------------- */
+function VerInformesMonitores() {
+  const [reports, setReports] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [filterAssignment, setFilterAssignment] = useState('todos');
   const [assignments, setAssignments] = useState([]);
-  const [fecha, setFecha] = useState('');
-  const [horasReportadas, setHorasReportadas] = useState('');
-  const [comentarios, setComentarios] = useState('');
-  const [desempeño, setDesempeño] = useState('bueno');
-  const [submitting, setSubmitting] = useState(false);
-  const [message, setMessage] = useState('');
 
-  // Cargar asignaciones activas
   useEffect(() => {
-    const loadAssignments = async () => {
-      const token = localStorage.getItem('token');
-      if (!token) return;
-
-      try {
-        const res = await fetch('http://localhost:3001/api/assignments?estado=activa', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        const data = await res.json();
-        if (res.ok) {
-          const assigns = Array.isArray(data.assignments) ? data.assignments : [];
-          setAssignments(assigns);
-        }
-      } catch (err) {
-        console.error(err);
-      }
-    };
+    loadReports();
     loadAssignments();
   }, []);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setSubmitting(true);
-    setMessage('');
-
+  const loadAssignments = async () => {
     const token = localStorage.getItem('token');
-    if (!token) {
-      alert('Debes iniciar sesión como docente.');
-      return;
-    }
+    if (!token) return;
 
     try {
-      const payload = {
-        assignmentId: parseInt(assignmentId),
-        fecha: fecha || new Date().toISOString().split('T')[0],
-        horasReportadas: parseInt(horasReportadas),
-        comentarios,
-        desempeño
-      };
-
-      const res = await fetch('http://localhost:3001/api/reports', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify(payload)
+      const res = await fetch('http://localhost:3001/api/assignments', {
+        headers: { Authorization: `Bearer ${token}` }
       });
-
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message || 'Error al registrar informe');
-
-      setMessage('Informe registrado exitosamente');
-      setAssignmentId('');
-      setFecha('');
-      setHorasReportadas('');
-      setComentarios('');
-      setDesempeño('bueno');
+      if (res.ok) {
+        setAssignments(Array.isArray(data.assignments) ? data.assignments : []);
+      }
     } catch (err) {
       console.error(err);
-      setMessage(err.message || 'Error al registrar informe');
-    } finally {
-      setSubmitting(false);
     }
   };
 
-  return (
-    <form className={style.formularioInforme} onSubmit={handleSubmit}>
-      <h2>Informe de Monitoría</h2>
+  const loadReports = async () => {
+    setLoading(true);
+    const token = localStorage.getItem('token');
+    if (!token) return;
 
-      {message && (
-        <div className={message.includes('Error') ? style.errorMessage : style.successMessage}>
-          {message}
+    try {
+      const res = await fetch('http://localhost:3001/api/reports', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setReports(Array.isArray(data.reports) ? data.reports : []);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filteredReports = filterAssignment === 'todos' 
+    ? reports 
+    : reports.filter(r => r.assignmentId === parseInt(filterAssignment));
+
+  if (loading) {
+    return (
+      <div className={style.informesContainer}>
+        <p style={{textAlign: 'center', padding: '40px', color: '#666'}}>Cargando informes...</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className={style.informesContainer}>
+      <div className={style.informesHeader}>
+        <h2>📋 Seguimiento de Informes</h2>
+        <div className={style.filterRow}>
+          <label>
+            Seleccionar monitoría:
+            <select 
+              value={filterAssignment} 
+              onChange={(e) => setFilterAssignment(e.target.value)}
+              className={style.filterSelect}
+            >
+              <option value="todos">📊 Ver todos los informes</option>
+              {assignments.map((a) => (
+                <option key={a.id} value={a.id}>
+                  {a.convocatoria?.titulo || `Monitoría #${a.id}`} - {a.estudiante?.nombre || 'Sin asignar'}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+      </div>
+
+      {filteredReports.length === 0 ? (
+        <div className={style.emptyReports}>
+          <p>📭 No hay informes disponibles.</p>
+          <p className={style.helpText}>Los estudiantes monitores pueden subir sus informes desde su dashboard.</p>
+        </div>
+      ) : (
+        <div className={style.reportsList}>
+          {filteredReports.map((report) => (
+            <div key={report.id} className={style.reportCard}>
+              <div className={style.reportCardHeader}>
+                <div>
+                  <h3>{report.assignment?.convocatoria?.titulo || 'Monitoría'}</h3>
+                  <p className={style.studentName}>
+                    👤 {report.autor?.username || report.assignment?.estudiante?.username || 'Estudiante'}
+                  </p>
+                </div>
+                <div className={style.reportMeta}>
+                  <span className={style.reportDate}>
+                    📅 {new Date(report.fecha).toLocaleDateString('es-ES')}
+                  </span>
+                  <span className={`${style.badge} ${style[report.desempeño]}`}>
+                    {report.desempeño}
+                  </span>
+                </div>
+              </div>
+
+              <div className={style.reportBody}>
+                <p className={style.reportHours}>
+                  <strong>⏱️ Horas reportadas:</strong> {report.horasReportadas}h
+                </p>
+                <div className={style.reportComments}>
+                  <strong>📝 Actividades realizadas:</strong>
+                  <p>{report.comentarios}</p>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       )}
-
-      <div className={style.formRow}>
-        <label>
-          Monitor asignado
-          <select value={assignmentId} onChange={(e) => setAssignmentId(e.target.value)} required>
-            <option value="">Seleccionar monitor</option>
-            {assignments.map((assign) => (
-              <option key={assign.id} value={assign.id}>
-                {assign.application?.estudiante?.username || 'Monitor'} - {assign.application?.convocatoria?.materia || 'Materia'}
-              </option>
-            ))}
-          </select>
-        </label>
-
-        <label>
-          Fecha del informe
-          <input 
-            type="date" 
-            value={fecha} 
-            onChange={(e) => setFecha(e.target.value)}
-            required
-          />
-        </label>
-      </div>
-
-      <div className={style.formRow}>
-        <label>
-          Horas reportadas
-          <input 
-            type="number" 
-            min="1" 
-            value={horasReportadas} 
-            onChange={(e) => setHorasReportadas(e.target.value)}
-            placeholder="Número de horas"
-            required
-          />
-        </label>
-
-        <label>
-          Desempeño
-          <select value={desempeño} onChange={(e) => setDesempeño(e.target.value)} required>
-            <option value="bueno">Bueno</option>
-            <option value="regular">Regular</option>
-            <option value="bajo">Bajo</option>
-          </select>
-        </label>
-      </div>
-
-      <label>
-        Comentarios
-        <textarea 
-          value={comentarios} 
-          onChange={(e) => setComentarios(e.target.value)} 
-          placeholder="Escribe aquí los comentarios sobre el desempeño del monitor..."
-          rows="5"
-        />
-      </label>
-
-      <button type="submit" className={style.registrarBtn} disabled={submitting}>
-        {submitting ? 'Registrando...' : 'Registrar Informe'}
-      </button>
-    </form>
+    </div>
   );
 }
 
-/* ---------------- AlertasImportantes ---------------- */
-function AlertasImportantes() {
-  const [alertas, setAlertas] = useState([
-    { mensaje: "Recuerda revisar las hojas de vida antes del viernes.", fecha: "26/10/2025" },
-    { mensaje: "Un estudiante ha postulado para Matemáticas.", fecha: "25/10/2025" },
-    { mensaje: "Hay convocatorias sin evaluar.", fecha: "24/10/2025" },
-  ]);
-
-  return (
-    <section className={style.alertasImportantes}>
-      <h2>Alertas Importantes</h2>
-      <ul className={style.alertasList}>
-        {alertas.length === 0 ? (
-          <li className={style.alertaItem}>No hay alertas importantes.</li>
-        ) : (
-          alertas.map((alerta, index) => (
-            <li key={index} className={style.alertaItem}>
-              <div className={style.alertaHeader}>
-                <span className={style.alertaIcon}>🔔</span>
-                <span className={style.alertaTitulo}>¡Alerta!</span>
-                <span className={style.alertaFecha}>{alerta.fecha}</span>
-              </div>
-              <p className={style.alertaMensaje}>{alerta.mensaje}</p>
-            </li>
-          ))
-        )}
-      </ul>
-    </section>
-  );
-}
+/* ---------------- AlertasImportantes REEMPLAZADO POR COMPONENTE ALERTS ---------------- */
+// El componente AlertasImportantes hardcodeado fue eliminado
+// Ahora se usa el componente <Alerts /> importado de ../Alerts/Alerts
+// Este componente se conecta dinámicamente a la API y muestra notificaciones reales
 
 /* ---------------- Gestión de Candidatos ----------------
    Insertaré esta UI justo debajo del <h2> dentro de <section id="gestion">
@@ -343,6 +292,10 @@ function GestionCandidatos() {
   const [onlyAboveThreshold, setOnlyAboveThreshold] = useState(false);
   const [filterByEstado, setFilterByEstado] = useState('todos');
   const [orderBy, setOrderBy] = useState('score'); // 'score' o 'nombre'
+  
+  // Modal para ver detalles de la postulación
+  const [selectedCandidate, setSelectedCandidate] = useState(null);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
 
   // Filtrado en tiempo real por nombre, puntuación y estado
   const filtered = candidates
@@ -361,8 +314,15 @@ function GestionCandidatos() {
     });
 
   // Handlers
-  const toggleVisto = (id) =>
-    setCandidates((prev) => prev.map((c) => (c.id === id ? { ...c, visto: !c.visto } : c)));
+  const verDetalles = (candidate) => {
+    setSelectedCandidate(candidate);
+    setShowDetailsModal(true);
+  };
+
+  const cerrarModal = () => {
+    setShowDetailsModal(false);
+    setSelectedCandidate(null);
+  };
 
   // Call backend to change application status to preseleccionada
   const marcarPreseleccionado = async (id) => {
@@ -480,6 +440,10 @@ function GestionCandidatos() {
           visto: false,
           preseleccionado: a.estado === 'preseleccionada' || a.estado === 'seleccionada',
           cvPath: a.cvPath || null,
+          perfil: a.perfilTexto || "",
+          convocatoria: a.convocatoria?.titulo || "-",
+          email: a.estudiante?.email || "",
+          fechaAplicacion: a.createdAt || new Date(),
         }));
         setCandidates(mapped);
       } catch (err) {
@@ -642,9 +606,9 @@ function GestionCandidatos() {
 
                   <td className={style.actionsCell}>
                     <button
-                      title={c.visto ? "Marcado como visto" : "Marcar como visto"}
+                      title="Ver detalles de la postulación"
                       className={style.actionBtn}
-                      onClick={() => toggleVisto(c.id)}
+                      onClick={() => verDetalles(c)}
                     >
                       👁
                     </button>
@@ -681,6 +645,73 @@ function GestionCandidatos() {
           </tbody>
         </table>
       </div>
+
+      {/* Modal de detalles de la postulación */}
+      {showDetailsModal && selectedCandidate && (
+        <div className={style.modalOverlay} onClick={cerrarModal}>
+          <div className={style.modalContent} onClick={(e) => e.stopPropagation()}>
+            <div className={style.modalHeader}>
+              <h3>📄 Detalles de la Postulación</h3>
+              <button className={style.closeBtn} onClick={cerrarModal}>✕</button>
+            </div>
+            
+            <div className={style.modalBody}>
+              {/* Información del estudiante */}
+              <div className={style.detailSection}>
+                <h4>👤 Información del Candidato</h4>
+                <p><strong>Nombre:</strong> {selectedCandidate.nombre}</p>
+                <p><strong>Estado:</strong> <span className={`${style.badge} ${style[selectedCandidate.estado]}`}>{selectedCandidate.estado}</span></p>
+                <p><strong>Score IA:</strong> <span className={style.scoreHighlight}>{Math.round(selectedCandidate.score * 100)}%</span></p>
+              </div>
+
+              {/* Perfil del estudiante */}
+              <div className={style.detailSection}>
+                <h4>📝 Perfil / Carta de Motivación</h4>
+                <div className={style.perfilTexto}>
+                  {selectedCandidate.perfil || 'No proporcionó descripción de perfil.'}
+                </div>
+              </div>
+
+              {/* Convocatoria a la que aplicó */}
+              <div className={style.detailSection}>
+                <h4>🎯 Convocatoria</h4>
+                <p><strong>Título:</strong> {selectedCandidate.convocatoria || 'N/A'}</p>
+              </div>
+
+              {/* CV */}
+              <div className={style.detailSection}>
+                <h4>📎 Curriculum Vitae</h4>
+                {selectedCandidate.cvPath ? (
+                  <a 
+                    href={`http://localhost:3001${selectedCandidate.cvPath}`} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className={style.downloadBtn}
+                  >
+                    📥 Descargar CV (PDF)
+                  </a>
+                ) : (
+                  <p className={style.noData}>No se subió CV</p>
+                )}
+              </div>
+
+              {/* Análisis de IA */}
+              {selectedCandidate.aiAnalysis && (
+                <div className={style.detailSection}>
+                  <h4>🤖 Análisis de la IA</h4>
+                  <div className={style.aiAnalysisBox}>
+                    {selectedCandidate.aiAnalysis}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className={style.modalFooter}>
+              <button className={style.btnSecondary} onClick={cerrarModal}>Cerrar</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -810,6 +841,8 @@ function EvaluacionAsignacion() {
 function Teacher() {
   const navigate = useNavigate();
   const [userName, setUserName] = useState("Juan Pérez");
+  const [userInfo, setUserInfo] = useState(null);
+  const [showProfileModal, setShowProfileModal] = useState(false);
   const [activeSection, setActiveSection] = useState("materias");
   const activeSectionRef = useRef(activeSection);
   const tickingRef = useRef(false);
@@ -824,6 +857,7 @@ function Teacher() {
       const raw = localStorage.getItem("user");
       if (!raw) return;
       const parsed = JSON.parse(raw);
+      setUserInfo(parsed); // Guardar toda la info
       const name = parsed.name || parsed.nombre || parsed.username || parsed.userName;
       if (name) setUserName(name);
     } catch (e) {}
@@ -897,7 +931,7 @@ function Teacher() {
   };
 
   const handleProfileClick = () => {
-    console.log('Ver perfil click');
+    setShowProfileModal(true);
   };
 
   return (
@@ -927,7 +961,7 @@ function Teacher() {
         <section id="publicar">
           <h2>Publicar Convocatorias</h2>
           <PublicarConvocatoria />
-          <AlertasImportantes />
+          <Alerts />
         </section>
 
         <section id="gestion">
@@ -942,8 +976,8 @@ function Teacher() {
         </section>
 
         <section id="informes">
-          <h2>Informes de Monitorías</h2>
-          <RegistrarInforme />
+          <h2>Seguimiento de Informes</h2>
+          <VerInformesMonitores />
         </section>
       </main>
 
@@ -959,6 +993,58 @@ function Teacher() {
           <a href="https://www.linkedin.com/school/universidad-de-medellin/" target="_blank" rel="noopener noreferrer"><i className="fab fa-linkedin-in"></i></a>
         </div>
       </footer>
+
+      {/* Modal de Perfil */}
+      {showProfileModal && (
+        <div className={style.modalOverlay} onClick={() => setShowProfileModal(false)}>
+          <div className={style.modalContent} onClick={(e) => e.stopPropagation()}>
+            <div className={style.modalHeader}>
+              <h3>👤 Información del Perfil</h3>
+              <button className={style.closeBtn} onClick={() => setShowProfileModal(false)}>
+                ✕
+              </button>
+            </div>
+            <div className={style.modalBody}>
+              <div className={style.profileSection}>
+                <div className={style.profileImageContainer}>
+                  <img src={perfil} alt="Foto de perfil" className={style.profileImage} />
+                </div>
+                <div className={style.profileInfo}>
+                  <div className={style.infoRow}>
+                    <span className={style.infoLabel}>👤 Nombre:</span>
+                    <span className={style.infoValue}>{userInfo?.nombre || userInfo?.name || userName}</span>
+                  </div>
+                  <div className={style.infoRow}>
+                    <span className={style.infoLabel}>📧 Email:</span>
+                    <span className={style.infoValue}>{userInfo?.email || 'No disponible'}</span>
+                  </div>
+                  <div className={style.infoRow}>
+                    <span className={style.infoLabel}>🎓 Rol:</span>
+                    <span className={style.infoValue}>{userInfo?.role || 'Docente'}</span>
+                  </div>
+                  {userInfo?.departamento && (
+                    <div className={style.infoRow}>
+                      <span className={style.infoLabel}>🏢 Departamento:</span>
+                      <span className={style.infoValue}>{userInfo.departamento}</span>
+                    </div>
+                  )}
+                  {userInfo?.username && (
+                    <div className={style.infoRow}>
+                      <span className={style.infoLabel}>🔑 Usuario:</span>
+                      <span className={style.infoValue}>{userInfo.username}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+            <div className={style.modalFooter}>
+              <button className={style.btnClose} onClick={() => setShowProfileModal(false)}>
+                Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

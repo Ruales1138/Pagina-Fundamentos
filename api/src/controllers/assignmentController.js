@@ -5,7 +5,7 @@ const Application = require("../models/Application");
 async function createAssignment(req, res) {
   try {
     const { applicationId, horasAsignadas, semestre } = req.body;
-    const app = await Application.findByPk(applicationId, { include: [{ association: "convocatoria" }] });
+    const app = await Application.findByPk(applicationId, { include: [{ association: "convocatoria" }, { association: "estudiante" }] });
     if (!app) return res.status(404).json({ ok: false, message: "Postulación no encontrada" });
 
     // only docente owner can assign
@@ -13,7 +13,14 @@ async function createAssignment(req, res) {
       return res.status(403).json({ ok: false, message: "No autorizado" });
     }
 
-    const assignment = await Assignment.create({ applicationId, horasAsignadas, semestre, docenteId: req.user.id });
+    const assignment = await Assignment.create({ 
+      applicationId, 
+      horasAsignadas, 
+      semestre, 
+      docenteId: req.user.id,
+      estudianteId: app.estudianteId,
+      convocatoriaId: app.convocatoriaId
+    });
     return res.status(201).json({ ok: true, assignment });
   } catch (err) {
     console.error(err);

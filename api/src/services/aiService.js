@@ -38,10 +38,19 @@ async function analyzeCVWithAI(cvText, cvPath, requisitos = [], habilidades = []
     // Si hay un archivo PDF, extraer el texto
     let fullText = cvText || "";
     if (cvPath && cvPath.endsWith(".pdf")) {
-      const absolutePath = path.join(__dirname, "../..", cvPath);
+      // Construir ruta absoluta correctamente (cvPath viene como /uploads/file.pdf)
+      const cleanPath = cvPath.startsWith('/') ? cvPath.substring(1) : cvPath;
+      const absolutePath = path.join(process.cwd(), cleanPath);
+      
+      console.log(`📄 Intentando leer PDF desde: ${absolutePath}`);
+      
       if (fs.existsSync(absolutePath)) {
+        console.log("✅ Archivo encontrado, extrayendo texto...");
         const extractedText = await extractTextFromPDF(absolutePath);
-        fullText += "\n\n" + extractedText;
+        console.log(`📝 Texto extraído del PDF (${extractedText.length} caracteres)`);
+        fullText += "\n\n=== CONTENIDO DEL CV (PDF) ===\n" + extractedText;
+      } else {
+        console.warn(`⚠️ Archivo PDF no encontrado en: ${absolutePath}`);
       }
     }
 

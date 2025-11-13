@@ -1,0 +1,269 @@
+/* StudentReports.module.css */
+
+.container {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.container h2 {
+  color: #c1272d;
+  font-size: 1.8rem;
+  margin-bottom: 24px;
+  font-weight: 600;
+}
+
+.emptyState {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 12px;
+  padding: 40px 20px;
+  text-align: center;
+  border: 2px dashed #dee2e6;
+  margin-top: 20px;
+}
+
+.emptyState p {
+  margin: 8px 0;
+  font-size: 1.05rem;
+  color: #6c757d;
+}
+
+/* Tarjeta del formulario */
+.formCard {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 24px;
+  overflow: hidden;
+}
+
+.formCard h3 {
+  color: #333;
+  font-size: 1.3rem;
+  margin-bottom: 20px;
+  font-weight: 600;
+}
+
+.formGroup {
+  margin-bottom: 20px;
+}
+
+.formGroup label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #333;
+  font-size: 0.95rem;
+}
+
+.formGroup select,
+.formGroup input,
+.formGroup textarea {
+  width: 100%;
+  max-width: 100%;
+  padding: 12px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-family: inherit;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+}
+
+.formGroup select:focus,
+.formGroup input:focus,
+.formGroup textarea:focus {
+  outline: none;
+  border-color: #c1272d;
+  box-shadow: 0 0 0 3px rgba(193, 39, 45, 0.1);
+}
+
+.formGroup textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.formRow {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.formRow .formGroup {
+  margin-bottom: 0;
+}
+
+.successMsg {
+  background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+  color: #155724;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  border: 2px solid #28a745;
+  font-weight: 500;
+}
+
+.errorMsg {
+  background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+  color: #721c24;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  border: 2px solid #dc3545;
+  font-weight: 500;
+}
+
+.submitBtn {
+  background: linear-gradient(135deg, #c1272d 0%, #a01f24 100%);
+  color: white;
+  border: none;
+  padding: 14px 32px;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(193, 39, 45, 0.3);
+  width: 100%;
+}
+
+.submitBtn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #a01f24 0%, #8a1a1f 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(193, 39, 45, 0.4);
+}
+
+.submitBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Tarjeta de historial */
+.reportsCard {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.reportsCard h3 {
+  color: #333;
+  font-size: 1.3rem;
+  margin-bottom: 20px;
+  font-weight: 600;
+}
+
+.emptyText {
+  text-align: center;
+  color: #999;
+  font-style: italic;
+  padding: 20px;
+}
+
+.reportsList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.reportItem {
+  background: #f8f9fa;
+  border-radius: 10px;
+  padding: 16px 20px;
+  border-left: 4px solid #c1272d;
+  transition: all 0.3s ease;
+}
+
+.reportItem:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translateX(4px);
+}
+
+.reportHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.reportDate {
+  font-size: 0.9rem;
+  color: #666;
+  font-weight: 500;
+}
+
+.badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.badge.excelente {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  color: white;
+}
+
+.badge.bueno {
+  background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+  color: white;
+}
+
+.badge.regular {
+  background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
+  color: white;
+}
+
+.reportTitle {
+  font-size: 1rem;
+  color: #333;
+  margin: 8px 0;
+}
+
+.reportTitle strong {
+  color: #c1272d;
+}
+
+.reportHours {
+  font-size: 0.95rem;
+  color: #555;
+  margin: 6px 0;
+}
+
+.reportHours strong {
+  color: #333;
+}
+
+.reportComments {
+  font-size: 0.95rem;
+  color: #666;
+  line-height: 1.6;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #dee2e6;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .formRow {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .formRow .formGroup {
+    margin-bottom: 20px;
+  }
+
+  .container {
+    padding: 16px;
+  }
+
+  .formCard,
+  .reportsCard {
+    padding: 16px;
+  }
+}

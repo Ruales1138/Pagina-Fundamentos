@@ -7,18 +7,23 @@ import Carousel from "../Caousel/Carousel";
 import Aplications from "../Aplications/Aplications";
 import Alerts from "../Alerts/Alerts";
 import Welcome from "../Welcome/Welcome";
+import StudentReports from "../StudentReports/StudentReports";
 import { useNavigate } from "react-router-dom";
 
 function Student() {
   const navigate = useNavigate();
   // marcador temporal para el nombre del usuario conectado; reemplazar por la autenticación real
   const [userName, setUserName] = useState('Susana Morales');
+  const [userInfo, setUserInfo] = useState(null);
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  
   // poblar userName desde localStorage si está disponible (el login guarda `user`)
   useEffect(() => {
     try {
       const raw = localStorage.getItem('user');
       if (!raw) return;
       const parsed = JSON.parse(raw);
+      setUserInfo(parsed); // Guardar toda la info del usuario
   // preferir campos de nombre completo si están presentes, de lo contrario usar username
       const name = parsed.name || parsed.nombre || parsed.username || parsed.userName;
       if (name) setUserName(name);
@@ -73,9 +78,7 @@ function Student() {
   }, []);
 
   const handleProfileClick = () => {
-    // manejador placeholder - la app puede reemplazarlo por navegación real
-    // eslint-disable-next-line no-console
-    console.log('Ver perfil click');
+    setShowProfileModal(true);
   };
 
   const handleLogout = () => {
@@ -180,7 +183,7 @@ function Student() {
 
         <div className={style.rightSection}>
           <button className={style.button} onClick={handleProfileClick}>
-            <span className={style.iconUser}>👤</span> Usuario
+            <span className={style.iconUser}>👤</span> {userName}
           </button>
           <button className={style.button} onClick={handleLogout}>
             <span className={style.iconLogout}>⎋</span> Cerrar Sesión
@@ -204,6 +207,12 @@ function Student() {
           >
             📄 Mis Aplicaciones
           </li>
+          <li 
+            onClick={() => scrollToSection('informes')}
+            className={activeSection === 'informes' ? style.active : ''}
+          >
+            📊 Mis Informes
+          </li>
         </ul>
 
         {/* Logo Universidad de Medellín */}
@@ -220,6 +229,8 @@ function Student() {
         <Carousel />
         {/* Mis aplicaciones */}
         <Aplications />
+        {/* Mis Informes */}
+        <StudentReports />
         {/* Alertas */}
         <Alerts />
       </main>
@@ -244,6 +255,58 @@ function Student() {
           </a>
         </div>
       </footer>
+
+      {/* Modal de Perfil */}
+      {showProfileModal && (
+        <div className={style.modalOverlay} onClick={() => setShowProfileModal(false)}>
+          <div className={style.modalContent} onClick={(e) => e.stopPropagation()}>
+            <div className={style.modalHeader}>
+              <h3>👤 Información del Perfil</h3>
+              <button className={style.closeBtn} onClick={() => setShowProfileModal(false)}>
+                ✕
+              </button>
+            </div>
+            <div className={style.modalBody}>
+              <div className={style.profileSection}>
+                <div className={style.profileImageContainer}>
+                  <img src={perfil} alt="Foto de perfil" className={style.profileImage} />
+                </div>
+                <div className={style.profileInfo}>
+                  <div className={style.infoRow}>
+                    <span className={style.infoLabel}>👤 Nombre:</span>
+                    <span className={style.infoValue}>{userInfo?.nombre || userInfo?.name || userName}</span>
+                  </div>
+                  <div className={style.infoRow}>
+                    <span className={style.infoLabel}>📧 Email:</span>
+                    <span className={style.infoValue}>{userInfo?.email || 'No disponible'}</span>
+                  </div>
+                  <div className={style.infoRow}>
+                    <span className={style.infoLabel}>🎓 Rol:</span>
+                    <span className={style.infoValue}>{userInfo?.role || 'Estudiante'}</span>
+                  </div>
+                  {userInfo?.carrera && (
+                    <div className={style.infoRow}>
+                      <span className={style.infoLabel}>📚 Carrera:</span>
+                      <span className={style.infoValue}>{userInfo.carrera}</span>
+                    </div>
+                  )}
+                  {userInfo?.username && (
+                    <div className={style.infoRow}>
+                      <span className={style.infoLabel}>🔑 Usuario:</span>
+                      <span className={style.infoValue}>{userInfo.username}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+            <div className={style.modalFooter}>
+              <button className={style.btnClose} onClick={() => setShowProfileModal(false)}>
+                Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

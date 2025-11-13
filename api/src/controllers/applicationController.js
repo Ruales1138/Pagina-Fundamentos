@@ -3,6 +3,7 @@ const Application = require("../models/Application");
 const Convocatoria = require("../models/Convocatoria");
 const { Op } = require("sequelize");
 const { analyzeCVWithAI } = require("../services/aiService");
+const { createNotification } = require("./alertController");
 
 async function applyToConvocatoria(req, res) {
   try {
@@ -37,6 +38,17 @@ async function applyToConvocatoria(req, res) {
       score,
       estado: "postulada",
     });
+
+    // 🔔 Notificar al docente de la nueva aplicación
+    console.log(`🔔 Notificando al docente ID: ${convocatoria.docenteId} sobre nueva aplicación`);
+    await createNotification(
+      convocatoria.docenteId,
+      'nueva_aplicacion',
+      `📬 Nueva aplicación a "${convocatoria.titulo}" - Score: ${score}%`,
+      application.id,
+      'application'
+    );
+    console.log("✅ Notificación de aplicación enviada");
 
     return res.status(201).json({ ok: true, application, score });
   } catch (err) {
@@ -85,8 +97,41 @@ async function updateApplicationStatus(req, res) {
       return res.status(403).json({ ok: false, message: "No autorizado" });
     }
 
+    const oldEstado = app.estado;
     app.estado = estado;
     await app.save();
+
+    // 🔔 Notificar al estudiante del cambio de estado
+    if (oldEstado !== estado) {
+      let message = '';
+      let emoji = '';
+      
+      switch (estado) {
+        case 'preseleccionada':
+          emoji = '🎯';
+          message = `${emoji} ¡Fuiste preseleccionado/a para "${app.convocatoria.titulo}"!`;
+          break;
+        case 'seleccionada':
+          emoji = '🎉';
+          message = `${emoji} ¡Felicidades! Fuiste seleccionado/a para "${app.convocatoria.titulo}"`;
+          break;
+        case 'rechazada':
+          emoji = '📋';
+          message = `${emoji} Tu aplicación a "${app.convocatoria.titulo}" no fue seleccionada esta vez`;
+          break;
+        default:
+          message = `Tu aplicación a "${app.convocatoria.titulo}" cambió de estado a: ${estado}`;
+      }
+
+      await createNotification(
+        app.estudianteId,
+        'estado_cambiado',
+        message,
+        app.id,
+        'application'
+      );
+    }
+
     return res.json({ ok: true, application: app });
   } catch (err) {
     console.error(err);

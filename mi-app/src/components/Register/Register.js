@@ -6,9 +6,12 @@ import { useNavigate } from "react-router-dom";
 function Register() {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
+  const [nombre, setNombre] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [role, setRole] = useState("Estudiante");
+  const [carrera, setCarrera] = useState("");
+  const [departamento, setDepartamento] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -25,10 +28,25 @@ function Register() {
     }
 
     try {
+      const payload = { 
+        username, 
+        email, 
+        nombre,
+        password, 
+        role 
+      };
+      
+      // Agregar carrera si es estudiante, departamento si es docente
+      if (role === 'Estudiante' && carrera) {
+        payload.carrera = carrera;
+      } else if (role === 'Docente' && departamento) {
+        payload.departamento = departamento;
+      }
+
       const res = await fetch("http://localhost:3001/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, email, password, role }),
+        body: JSON.stringify(payload),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Error en el registro");
@@ -73,6 +91,17 @@ function Register() {
           </div>
 
           <div className={style.formGroup}>
+            <label>Nombre Completo</label>
+            <input
+              className={style.input}
+              value={nombre}
+              onChange={(e) => setNombre(e.target.value)}
+              type="text"
+              placeholder="Ingrese su nombre completo"
+            />
+          </div>
+
+          <div className={style.formGroup}>
             <label>Contraseña</label>
             <input
               className={style.input}
@@ -107,6 +136,32 @@ function Register() {
               <option>Docente</option>
             </select>
           </div>
+
+          {role === 'Estudiante' && (
+            <div className={style.formGroup}>
+              <label>Carrera</label>
+              <input
+                className={style.input}
+                value={carrera}
+                onChange={(e) => setCarrera(e.target.value)}
+                type="text"
+                placeholder="Ingrese su carrera (ej: Ingeniería de Sistemas)"
+              />
+            </div>
+          )}
+
+          {role === 'Docente' && (
+            <div className={style.formGroup}>
+              <label>Departamento</label>
+              <input
+                className={style.input}
+                value={departamento}
+                onChange={(e) => setDepartamento(e.target.value)}
+                type="text"
+                placeholder="Ingrese su departamento (ej: Ingeniería)"
+              />
+            </div>
+          )}
 
           {error && <div className={style.error}>{error}</div>}
 

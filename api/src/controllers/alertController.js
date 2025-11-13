@@ -1,45 +1,111 @@
 // src/controllers/alertController.js
 const { Op } = require("sequelize");
-const Assignment = require("../models/Assignment");
-const MonitoringReport = require("../models/MonitoringReport");
+const Notification = require("../models/Notification");
+const User = require("../models/User");
 
-async function alertsSummary(req, res) {
+/**
+ * 🔔 Obtener notificaciones del usuario actual
+ */
+async function getNotifications(req, res) {
   try {
-    const since = new Date();
-    since.setDate(since.getDate() - 30);
+    const { limit = 10, unreadOnly = false } = req.query;
+    
+    const where = { userId: req.user.id };
+    if (unreadOnly === 'true') {
+      where.read = false;
+    }
 
-    // find assignments with no reports in last 30 days
-    const assignments = await Assignment.findAll();
-    const reportCounts = await MonitoringReport.findAll({
-      attributes: ["assignmentId", [MonitoringReport.sequelize.fn("COUNT", MonitoringReport.sequelize.col("id")), "cnt"]],
-      where: { createdAt: { [Op.gte]: since } },
-      group: ["assignmentId"],
+    const notifications = await Notification.findAll({
+      where,
+      order: [['createdAt', 'DESC']],
+      limit: parseInt(limit),
     });
-    const countMap = Object.fromEntries(reportCounts.map((r) => [r.assignmentId, Number(r.get("cnt"))]));
 
-    const missingReports = assignments.filter((a) => (countMap[a.id] || 0) === 0).map((a) => a.id);
-
-    // simplistic performance alert: any recent report with desempeño "bajo"
-    const lowPerf = await MonitoringReport.findAll({ where: { createdAt: { [Op.gte]: since }, desempeño: "bajo" }, attributes: ["assignmentId"] });
-    const lowPerfSet = new Set(lowPerf.map((r) => r.assignmentId));
-
-    // hours control: sum horasReportadas vs horasAsignadas
-    const hoursAgg = await MonitoringReport.findAll({
-      attributes: ["assignmentId", [MonitoringReport.sequelize.fn("SUM", MonitoringReport.sequelize.col("horasReportadas")), "horas"]],
-      group: ["assignmentId"],
+    const unreadCount = await Notification.count({
+      where: { userId: req.user.id, read: false },
     });
-    const horasMap = Object.fromEntries(hoursAgg.map((r) => [r.assignmentId, Number(r.get("horas"))]));
-    const exceededHours = assignments.filter((a) => (horasMap[a.id] || 0) > a.horasAsignadas).map((a) => a.id);
 
-    return res.json({ ok: true, alerts: {
-      missingReports, // assignments sin reportes recientes
-      lowPerformance: Array.from(lowPerfSet),
-      exceededHours,
-    }});
+    return res.json({ 
+      ok: true, 
+      notifications,
+      unreadCount,
+    });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ ok: false, message: "Error del servidor" });
   }
 }
 
-module.exports = { alertsSummary };
+/**
+ * ✅ Marcar notificación como leída
+ */
+async function markAsRead(req, res) {
+  try {
+    const { id } = req.params;
+
+    const notification = await Notification.findByPk(id);
+    if (!notification) {
+      return res.status(404).json({ ok: false, message: "Notificación no encontrada" });
+    }
+
+    if (notification.userId !== req.user.id) {
+      return res.status(403).json({ ok: false, message: "No autorizado" });
+    }
+
+    notification.read = true;
+    await notification.save();
+
+    return res.json({ ok: true, notification });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ ok: false, message: "Error del servidor" });
+  }
+}
+
+/**
+ * ✅ Marcar todas las notificaciones como leídas
+ */
+async function markAllAsRead(req, res) {
+  try {
+    await Notification.update(
+      { read: true },
+      { where: { userId: req.user.id, read: false } }
+    );
+
+    return res.json({ ok: true, message: "Todas las notificaciones marcadas como leídas" });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ ok: false, message: "Error del servidor" });
+  }
+}
+
+/**
+ * 🔔 Crear notificación (función helper interna)
+ * @param {number} userId - ID del usuario que recibirá la notificación
+ * @param {string} type - Tipo de notificación
+ * @param {string} message - Mensaje de la notificación
+ * @param {number} relatedId - ID relacionado (opcional)
+ * @param {string} relatedType - Tipo de entidad relacionada (opcional)
+ */
+async function createNotification(userId, type, message, relatedId = null, relatedType = null) {
+  try {
+    await Notification.create({
+      userId,
+      type,
+      message,
+      relatedId,
+      relatedType,
+      read: false,
+    });
+    console.log(`📩 Notificación creada para usuario ${userId}: ${message}`);
+  } catch (err) {
+    console.error("Error creando notificación:", err);
+  }
+}
+
+module.exports = { 
+  getNotifications, 
+  markAsRead, 
+  markAllAsRead,
+  createNotification, // Exportar para usar en otros controladores
+};

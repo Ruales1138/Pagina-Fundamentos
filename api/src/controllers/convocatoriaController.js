@@ -1,5 +1,7 @@
 // src/controllers/convocatoriaController.js
 const Convocatoria = require("../models/Convocatoria");
+const User = require("../models/User");
+const { createNotification } = require("./alertController");
 
 // Crear convocatoria
 async function crearConvocatoria(req, res) {
@@ -22,6 +24,23 @@ async function crearConvocatoria(req, res) {
       docenteId: req.user.id,
     });
 
+    // Notificar a todos los estudiantes sobre la nueva convocatoria
+    console.log("🔔 Buscando estudiantes para notificar...");
+    const estudiantes = await User.findAll({ where: { role: "Estudiante" } });
+    console.log(`📊 Encontrados ${estudiantes.length} estudiantes`);
+    
+    for (const estudiante of estudiantes) {
+      console.log(`📩 Notificando a estudiante ID: ${estudiante.id}`);
+      await createNotification(
+        estudiante.id,
+        "nueva_convocatoria",
+        `📢 Nueva convocatoria disponible: ${titulo}`,
+        convocatoria.id,
+        "convocatoria"
+      );
+    }
+
+    console.log("✅ Convocatoria creada y notificaciones enviadas");
     return res.status(201).json({ ok: true, convocatoria });
   } catch (err) {
     console.error(err);

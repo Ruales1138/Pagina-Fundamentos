@@ -1,30 +1,152 @@
+/* Alerts.module.css - Estilo mejorado para notificaciones */
+
+/* Contenedor principal de alertas */
 .alertsContainer {
   display: flex;
-  flex-direction: column; /* apiladas verticalmente */
-  gap: 16px; /* espacio entre alertas */
-  margin: 25px;
-}
-
-.alertBox {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px; /* espacio entre icono y texto */
-  background: #F3F4F6FF;
-  border-radius: 8px;
-  padding: 16px 20px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-}
-
-.alertIcon {
-  font-size: 24px;
-  flex-shrink: 0;
-}
-
-.alertText {
-  text-align: left;  /* fuerza que el texto esté a la izquierda */
-  display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+/* Badge contador de notificaciones */
+.badge {
+  display: inline-block;
+  background: linear-gradient(135deg, #c1272d 0%, #a01f24 100%);
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 20px;
+  margin-left: 10px;
+  box-shadow: 0 2px 4px rgba(193, 39, 45, 0.3);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 2px 4px rgba(193, 39, 45, 0.3);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 4px 8px rgba(193, 39, 45, 0.5);
+  }
+}
+
+/* Botón "Marcar todas como leídas" */
+.markAllBtn {
+  background: linear-gradient(135deg, #c1272d 0%, #a01f24 100%);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 6px rgba(193, 39, 45, 0.3);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.markAllBtn::before {
+  content: "✓✓";
+  font-size: 1rem;
+}
+
+.markAllBtn:hover {
+  background: linear-gradient(135deg, #a01f24 0%, #8a1a1f 100%);
+  box-shadow: 0 4px 12px rgba(193, 39, 45, 0.4);
+  transform: translateY(-2px);
+}
+
+.markAllBtn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(193, 39, 45, 0.3);
+}
+
+/* Caja de alerta individual */
+.alertBox {
+  background: white;
+  border-radius: 12px;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  position: relative;
+}
+
+.alertBox:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  transform: translateX(4px);
+}
+
+/* Alerta no leída */
+.unread {
+  background: linear-gradient(135deg, #fff5f5 0%, #ffffff 100%);
+  border-color: #c1272d;
+}
+
+/* Alerta leída */
+.read {
+  opacity: 0.7;
+  background: #fafafa;
+}
+
+.read:hover {
+  opacity: 0.85;
+}
+
+/* Icono de la alerta */
+.alertIcon {
+  font-size: 2rem;
+  min-width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f8f8f8 0%, #efefef 100%);
+  border-radius: 50%;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.unread .alertIcon {
+  background: linear-gradient(135deg, #ffe6e7 0%, #ffd1d3 100%);
+  animation: iconBounce 2s ease-in-out infinite;
+}
+
+@keyframes iconBounce {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+/* Texto de la alerta */
+.alertText {
+  flex: 1;
+  text-align: left;
+}
+
+.alertText p {
+  margin: 0 0 6px 0;
+  font-size: 1rem;
+  color: #333;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.alertText small {
+  color: #888;
+  font-size: 0.85rem;
+  display: block;
 }
 
 .alertText h3 {
@@ -34,9 +156,72 @@
   color: #222;
 }
 
-.alertText p {
-  font-size: 14px;
-  margin: 0;
-  color: #555;
-  line-height: 1.3;
+/* Punto indicador de no leída */
+.unreadDot {
+  width: 12px;
+  height: 12px;
+  background: linear-gradient(135deg, #c1272d 0%, #a01f24 100%);
+  border-radius: 50%;
+  box-shadow: 0 0 8px rgba(193, 39, 45, 0.6);
+  animation: dotPulse 1.5s ease-in-out infinite;
 }
+
+@keyframes dotPulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 8px rgba(193, 39, 45, 0.6);
+  }
+  50% {
+    transform: scale(1.2);
+    box-shadow: 0 0 12px rgba(193, 39, 45, 0.8);
+  }
+}
+
+/* Estado vacío */
+.emptyState {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 12px;
+  padding: 40px 20px;
+  text-align: center;
+  border: 2px dashed #dee2e6;
+}
+
+.emptyState p {
+  margin: 0;
+  font-size: 1.1rem;
+  color: #6c757d;
+  font-weight: 500;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .alertBox {
+    padding: 12px 16px;
+    gap: 12px;
+  }
+
+  .alertIcon {
+    font-size: 1.5rem;
+    min-width: 40px;
+    height: 40px;
+  }
+
+  .alertText p {
+    font-size: 0.9rem;
+  }
+
+  .alertText small {
+    font-size: 0.75rem;
+  }
+
+  .markAllBtn {
+    padding: 8px 16px;
+    font-size: 0.85rem;
+  }
+
+  .badge {
+    font-size: 0.7rem;
+    padding: 2px 8px;
+  }
+}
+

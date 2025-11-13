@@ -7,6 +7,26 @@ const User = sequelize.define('User', {
     unique: true,
     allowNull: false,
   },
+  email: {
+    type: DataTypes.STRING,
+    unique: true,
+    allowNull: true,
+    validate: {
+      isEmail: true,
+    },
+  },
+  nombre: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  carrera: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  departamento: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
   passwordHash: {
     type: DataTypes.STRING,
     allowNull: false,
@@ -15,6 +35,14 @@ const User = sequelize.define('User', {
     type: DataTypes.STRING,
     allowNull: false,
     defaultValue: 'Estudiante',
+  },
+  resetCode: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  resetCodeExpires: {
+    type: DataTypes.DATE,
+    allowNull: true,
   },
 }, {
   tableName: 'users',

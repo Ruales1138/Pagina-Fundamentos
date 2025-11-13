@@ -2,20 +2,24 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
+  min-height: 100vh;
+  padding: 20px;
   background-color: #f8f9fb;
   font-family: 'Open Sans', sans-serif;
+  overflow-y: auto;
 }
 
 .card {
   background: white;
   border-radius: 10px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  width: 400px;
-  padding: 40px 40px;
+  width: 100%;
+  max-width: 500px;
+  padding: 30px 40px;
   display: flex;
   flex-direction: column;
   align-items: center;
+  margin: auto;
 }
 
 .logo {
